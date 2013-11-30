@@ -1,0 +1,206 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:regular,semibold,italic,italicsemibold|PT+Sans:400,700,400italic,700italic|PT+Serif:400,700,400italic,700italic" rel="stylesheet" />
+    <link href="css/impress.css" rel="stylesheet" />
+</head>
+<body>
+<div id="impress" class="impress-not-supported">
+    <div class="fallback-message">
+        <p>Your browser <b>doesn't support the features required</b> by impress.js, so you are presented with a simplified version of this presentation.</p>
+        <p>For the best experience please use the latest <b>Chrome</b> or <b>Safari</b> browser. Firefox 10 (to be released soon) will also handle it.</p>
+    </div>
+
+<div class="step" data-x="0" id="title" data-y="0">
+<h2>Fabricで楽しよう</h2>
+
+<p>こばやし けんいち</p>
+
+</div>
+<div data-y="0" class="step" data-x="1200">
+<h2>サーバ台数多くなるといろいろ面倒</h2>
+
+<ul>
+<li>シェルスクリプトで
+<ul>
+<li>複雑なことやらせるのは無理</li>
+</ul></li>
+<li>ChefとかPuppetとかある
+<ul>
+<li>覚えること多かったり、使うまでにそれなりに手間かかる</li>
+</ul></li>
+</ul>
+
+</div>
+<div data-y="0" data-x="2400" class="step">
+<h2>Fabricとは</h2>
+
+<ul>
+<li>シンプルなデプロイ・システム管理ツール
+<ul>
+<li>とりあえず始めるのに覚えることが少ない</li>
+</ul></li>
+<li>Python製で設定ファイルもPythonのスクリプト
+<ul>
+<li>いざとなればPythonで書けることはなんでもできる</li>
+<li>Python 2.5以降が必要なのでCentOSでは別途インストールが必要</li>
+</ul></li>
+<li>SSH経由で他のサーバに乗り込んで作業ができる
+<ul>
+<li>乗り込んだ先のマシンにいろいろインストールする必要はない</li>
+</ul></li>
+</ul>
+
+</div>
+<div data-y="0" class="step" data-x="3600">
+<h2>設定ファイル例</h2>
+
+<?prettify lang=python?>
+
+<pre><code>from fabric.api import *
+
+def host_name():
+    run('hostname')
+
+def get_hosts():
+    get('/etc/hosts')
+
+def sudo_test():
+    run('whoami')
+    sudo('whoami')
+</code></pre>
+
+</div>
+<div data-x="4800" class="step" data-y="0">
+<h2>設定ファイル</h2>
+
+<ul>
+<li>fabfile.py という名前でファイルを用意する</li>
+<li>タスク = 関数</li>
+<li>複数ファイルに分割してモジュール化できるので、規模がある程度大きくなっても安心</li>
+</ul>
+
+</div>
+<div class="step" data-x="0" data-y="800">
+<h2>コマンドを実行する</h2>
+
+<pre><code>$ fab -H server1,server2 host_name
+[server1] Executing task 'host_name'
+[server1] run: hostname
+[server1] Passphrase for private key:
+[server1] out: server1
+[server1] out:
+[server2] Executing task 'host_name'
+[server2] run: hostname
+[server2] out: server2
+[server2] out:
+Done.
+</code></pre>
+
+</div>
+<div class="step" data-x="1200" data-y="800">
+<h2>ファイルをダウンロードする</h2>
+
+<pre><code>$ fab -H server1,server2 get_hosts
+[server1] Executing task 'get_hosts'
+[server1] Passphrase for private key:
+[server1] download: /home/user/server1/hosts &lt;- /etc/hosts
+[server2] Executing task 'get_hosts'
+[server2] download: /home/user/server2/hosts &lt;- /etc/hosts
+Done.
+</code></pre>
+
+</div>
+<div data-x="2400" class="step" data-y="800">
+<h2>sudoで実行する</h2>
+
+<pre><code>$ fab -H server1 sudo_test
+[server1] Executing task 'sudo_test'
+[server1] run: whoami
+[server1] Passphrase for private key:
+[server1] out: user
+[server1] out:
+[server1] sudo: whoami
+[server1] out: sudo password:
+[server1] out: root
+[server1] out:
+Done.
+</code></pre>
+
+</div>
+<div data-y="800" data-x="3600" class="step">
+<h2>複数タスクを実行する</h2>
+
+<pre><code>$ fab -H server1 host_name get_hosts
+[server1] Executing task 'host_name'
+[server1] run: hostname
+[server1] Passphrase for private key:
+[server1] out: server1
+[server1] out:
+[server1] Executing task 'get_hosts'
+[server1] download: /home/user/server1/hosts &lt;- /etc/hosts
+Done.
+</code></pre>
+
+</div>
+<div data-y="800" data-x="4800" class="step">
+<h2>ホスト名の管理</h2>
+
+<ul>
+<li>fabfile.py中では変数なので、設定ファイル中に埋め込むことも可能</li>
+<li>Roleでグループ化することも可能</li>
+<li>Pythonスクリプトなので、外部からホスト一覧を読み込むことも可能</li>
+</ul>
+
+</div>
+<div data-y="1600" class="step" data-x="0">
+<h2>その他できること</h2>
+
+<ul>
+<li>コマンド実行結果の取り込み</li>
+<li>シェルの起動</li>
+<li>ファイルのアップロード</li>
+<li>rsync</li>
+<li>テンプレートを使ったテキストのアップロード</li>
+<li>正規表現を使ったリモートファイルの修正</li>
+</ul>
+
+</div>
+<div data-y="1600" data-x="1200" class="step">
+<h2>参考</h2>
+
+<ul>
+<li>Fabricドキュメント <a href="http://docs.fabfile.org/">http://docs.fabfile.org/</a></li>
+<li>Fabric 1.0日本語ドキュメント <a href="https://fabric_ja.readthedocs.org/en/latest/">https://fabric_ja.readthedocs.org/en/latest/</a></li>
+<li>Python日本語ドキュメント <a href="http://docs.python.jp/2/index.html">http://docs.python.jp/2/index.html</a></li>
+<li>今日からすぐに使えるデプロイ・システム管理ツール Fabric 入門 <a href="http://d.hatena.ne.jp/shiumachi/20130414/1365920515">http://d.hatena.ne.jp/shiumachi/20130414/1365920515</a></li>
+<li>Python製デプロイツール Fabricを初めて使う際に役立つTips <a href="http://dekokun.github.io/posts/2013-04-07.html">http://dekokun.github.io/posts/2013-04-07.html</a></li>
+<li>fabfileの構造化 <a href="http://d.hatena.ne.jp/feiz/20110915/1316107432">http://d.hatena.ne.jp/feiz/20110915/1316107432</a></li>
+<li>Fabric デプロイツールのPythonicな書き方 <a href="http://www.ianlewis.org/jp/fabric-pythonic">http://www.ianlewis.org/jp/fabric-pythonic</a></li>
+</ul>
+
+<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+
+</div>
+
+
+    <div id="overview" class="step" data-x="3000" data-y="1500" data-scale="10">
+    </div>
+
+</div>
+
+<div class="hint">
+    <p>Use a spacebar or arrow keys to navigate</p>
+</div>
+<script>
+if ("ontouchstart" in document.documentElement) { 
+    document.querySelector(".hint").innerHTML = "<p>Tap on the left or right to navigate</p>";
+}
+</script>
+<script src="js/impress.js"></script>
+
+</body>
+</html>
+
